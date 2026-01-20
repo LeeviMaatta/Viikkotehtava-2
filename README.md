@@ -1,8 +1,8 @@
-# Viikkotehtävä 1 – TODO-lista
+# Viikkotehtävä 2 – TODO-lista
 
 ## Yleiskuvaus
 
-Tämä Android-sovellus on toteutettu Jetpack Composella ilman XML-layoutteja. Sovellus esittää yksinkertaisen TODO-listan, jossa tehtäviä voidaan lisätä, merkitä valmiiksi, suodattaa ja järjestää.
+Tämä Android-sovellus on toteutettu Jetpack Composella ilman XML-layoutteja. Sovellus esittää yksinkertaisen TODO-listan, jossa tehtäviä voidaan lisätä, poistaa, merkitä valmiiksi, suodattaa ja järjestää. Sovelluksessa käyttöliittymä ja sovelluslogiikka on erotettu toisistaan ViewModelin avulla.
 
 ---
 
@@ -36,63 +36,51 @@ data class Task(
 
 ## Mock-data
 
-Sovellus käyttää mock-dataa (5–10 tehtävää), jotka alustetaan sovelluksen käynnistyessä listaan. Tätä dataa käytetään näkymän testaamiseen ja toiminnallisuuksien demonstrointiin.
+Sovellus käyttää mock-dataa (5 tehtävää), jotka alustetaan TaskViewModel-luokan init-lohkossa. Mock-data mahdollistaa sovelluksen toiminnallisuuksien testaamisen.
 
 ---
 
-## Kotlin-funktiot
+## ViewModel ja Compose-tilanhallinta
 
-### addTask
+### TaskViewModel
+TaskViewModel vastaa tehtävälistan tilasta ja sovelluslogiikasta. Se sisältää tehtävälistan mutableStateOf-tilamuuttujana, jolloin Jetpack Compose pystyy reagoimaan automaattisesti muutoksiin.
 
-Lisää uuden tehtävän listan perään.
+ViewModel tarjoaa seuraavat toiminnot:
+* **addTask(task: Task)** – lisää uuden tehtävän listaan
+* **toggleDone(id: Int)** – vaihtaa tehtävän valmiustilan
+* **removeTask(id: Int)** – poistaa tehtävän listasta
+* **filterByDone(done: Boolean)** – palauttaa vain valmiit tai keskeneräiset tehtävät
+* **sortByDueDate()** – järjestää tehtävät deadlinen mukaan
 
-```kotlin
-fun addTask(list: MutableList<Task>, task: Task)
-```
-
----
-
-### toggleDone
-
-Kääntää yksittäisen tehtävän `done`-tilan (true ↔ false) annetun id:n perusteella.
-
-```kotlin
-fun toggleDone(list: MutableList<Task>, id: Int)
-```
-
----
-
-### filterByDone
-
-Palauttaa listasta vain ne tehtävät, joiden `done`-tila vastaa annettua arvoa.
-
-```kotlin
-fun filterByDone(list: List<Task>, done: Boolean): List<Task>
-```
+### Compose-tilanhallinta
+Kun ViewModelin tila muuttuu, Compose päivittää automaattisesti vain ne käyttöliittymän osat, jotka riippuvat muuttuneesta tilasta.
+Sovelluksessa tilanhallinta perustuu seuraaviin periaatteisiin:
+* **ViewModel** säilyttää sovelluksen tilan
+* **UI** lukee tilan ViewModelista
+* **UI** ei muokkaa dataa suoraan
 
 ---
 
-### sortByDueDate
+## Miksi ViewModel on parempi kuin pelkkä remember?
 
-Järjestää tehtävälistan deadline-päivämäärän mukaan.
-
-```kotlin
-fun sortByDueDate(list: List<Task>): List<Task>
-```
+Pelkkä remember-tilanhallinta toimii vain Composablen elinkaaren ajan ja tila katoaa esimerkiksi näytön käännössä. ViewModel sen sijaan säilyy konfiguraatiomuutoksissa ja erottaa käyttöliittymän sovelluslogiikasta. Rakenne on myös selkeämpi ja vastuunjako on selkeä(UI ja logiikka). Tällöin sovelluksen laajentaminenkin on helpompaa.
 
 ---
 
 ## Käyttöliittymä (Compose)
 
 * **HomeScreen** näyttää tehtävälistan
-* Tehtävät esitetään `Column`- ja `Row`-rakenteilla
+* Tehtävät esitetään **LazyColumn**-komponentilla
+* Jokaisella tehtävällä on:
+    * Checkbox valmiustilan vaihtamiseen
+    * Otsikko
+    * Poista-painike
 * Käyttäjä voi:
-
-  * lisätä uusia tehtäviä lomakkeella
-  * merkitä tehtäviä valmiiksi Checkboxilla
-  * suodattaa vain valmiit tehtävät
-
-Kaikki UI on toteutettu Jetpack Composella ilman XML-layoutteja.
+    * lisätä uusia tehtäviä lomakkeella
+    * merkitä tehtäviä valmiiksi Checkboxilla
+    * suodattaa vain valmiit tehtävät
+    * poistaa tehtäviä
+    * järjestää tehtävät deadlinen mukaan
 
 ---
 
@@ -101,3 +89,4 @@ Kaikki UI on toteutettu Jetpack Composella ilman XML-layoutteja.
 * Kotlin
 * Jetpack Compose
 * Android Studio (Compose Template)
+* Android ViewModel (MVVM)
